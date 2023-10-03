@@ -1,0 +1,505 @@
+---
+title: "Resumen6"
+author: "Valentina Paz Campos Olguín"
+date: "2023-09-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 8. ANOVA de una vía para muestras independientes
+
+### Método de análisis de varianza (ANOVA)
+
+Sirve para combatir este problema al comparar simultáneamente 3 o más medias muestrales.
+
+### Análisis de varianza de una vía
+
+Procedimiento ANOVA para muestras independientes y muestras correlacionadas. Solo consideran una única variable independiente (de tipop categórica, un factor) cuyos niveles definen los grupos que se están comparando.
+
+ANOVA es una prueba ómnibus.
+
+## Condiciones para usar ANOVA de una vía para muestras independientes
+
+Condiciones:
+
+-   La escala con que se mide la variable dependiente tiene las propiedades de una escala de intervalos iguales.
+
+-   Las k muestras son aleatorias e independientes.
+
+-   Se puede suponer que las poblaciones tienen una distribución normal.
+
+-   Si las muestras provienen de más de una población, estas tienen la misma varianza.
+
+### Homogeneidad de las varianzas u homocedasticidad
+
+Regla sencilla para comprobar la cuarta condición. Comprueba que la razón entre la máxima y la mínima varianza muestral de los grupos no sea mayor a 1.5.
+
+La prueba ANOVA es robusta, que resiste bien a desviaciones en las condiciones de normalidad o de homocedasticidad, especialmente cuanto las muestras tienen el mismo tamaño.
+
+## Procedimiento ANOVA de una vía para muestras independientes
+
+ANOVA se centra en la **variabilidad** de las muestras.
+
+### Estimando la variabilidad
+
+La variabilidad total, $SS_{T}$ se calcula mediante la siguiente ecuación:
+
+$$
+\bar{x}_T = \frac{valores}{cantidadTotal}
+$$
+
+$$
+SS = \sum_{i=1}^{n}(x_i - \bar{x}_T)²
+$$
+
+La variabilidad total se puede descomponer entre dos tipos de variabilidad: dentro del mismo grupo y entre diferentes grupos.
+
+$$
+SS_T = SS_{bg} + SS_{wg}
+$$
+
+La variabilidad entre grupo permite medir de manera agregada la magnitud de las diferencias entre las distintas medias muestrales. Esta mide el grado en que los grupos difieren unos de otros.
+
+$$
+SS_{bg} = \sum_{i=1}^{k}n_i(\bar{x}_i - \bar{x}_T)²
+$$
+
+-   $k$: cantidad de grupos
+
+-   $n_i$: cantidad de observaciones en el i-ésimo grupo
+
+-   $\bar{x}_i$: media del iésimo grupo
+
+-   $\bar{x}_T$: media de la muestra combinada
+
+La variabilidad intra-grupos corresponde a la suma total de las desviaciones cuadradas al interior de cada grupo, lo que representa la variabilidad aleatoria de cada uno de los diferentes grupos.
+
+$$
+SS_{wg} = \sum_{i=1}^{k}SS_i
+$$
+
+### El estadístico de prueba F
+
+La varianza se calcula de la siguiente manera, con $\nu$ grados de libertad.
+
+$$
+s² = \frac{1}{\nu}\sum_{i=1}^{n}(x_i - \bar{x})²
+$$
+
+**Variabilidad entre grupos**
+
+Se tienen $\nu_{bg} = k - 1$ grados de libertad, k siendo la cantidad de grupos.
+
+La media cuadrada entre grupos es:
+
+$$
+MS_{bg} = \frac{SS_{bg}}{\nu_{bg}}
+$$
+
+**Variabilidad al interior de los grupos**
+
+Se tiene:
+
+$$
+\nu_{wg} = \sum_{i=1}^{k}(n_k - 1)
+$$
+
+$$
+MS_{wg} = \frac{SS_{wg}}{\nu_{wg}}
+$$
+
+Cantidad total de grados de libertad
+
+$$
+\nu_T = n_T - 1 = \nu_{bg} + \nu_{wg}
+$$
+
+-   $n_T$: tamaño de la muestra combinada
+
+En general se cumple:
+
+-   Si la hipótesis nula es verdadera, $MS_{bg}$ tiende a ser menor o igual que $MS_{wg}$.
+
+-   Si la hipótesis nula es falsa, $MS_{bg}$ tiende a ser mayor que $MS_{wg}$.
+
+Se tiene que para calcular la razón F se calcula $MS_{efecto}$, correspondiendo a una estimación de la varianza del efecto que se desea medir y $MS_{error}$ es la variabilidad aleatoria pura asociada a la situación.
+
+$$
+F = \frac{MS_{efecto}}{MS_{error}}
+$$
+
+```{r}
+pf(6.885, 2, 12, lower.tail = FALSE)
+#Este es el valor de p
+```
+
+### Resultado del procedimiento ANOVA
+
+![](images/Screenshot%20from%202023-09-28%2014-59-10.png)
+
+Si se usa ANOVA para casos con solo 2 grupos, los resultados son equivalentes a los que obtendríamos con una prueba t de Student, y el estadístico F sería igual al cuadrado del estadístico t². Pero la prueba t puede ser unilateral o bilateral, mientras que el análisis de varianza es intrínsicamente unidireccional, pues F solo está definida para valores no negativos.
+
+### Resumen del procedimiento ANOVA de una vía para muestras independientes
+
+1.  Calcular la suma de los cuadrados de las desviaciones para la muestra combinada ($SS_T$).
+2.  Para cada grupo g, calcular la suma de los cuadrados de las desviaciones dentro de dicho grupo ($SS_g$).
+3.  Calcular la variabilidad entre grupos ($SS_{bg}$).
+4.  Calcular la variabilidad al interior de los grupos ($SS_{wg}$).
+5.  Calcular los grados de libertad ( $\nu_T, \nu_{bg}$ y $\nu_{wg}$).
+6.  Calcular las medias de las desviaciones cuadradas ($MS_{bg}$ y $MS_{wg}$).
+7.  Calcular el estadístico de prueba ($F$).
+8.  Obtener el valor p.
+
+## ANOVA de una vía para muestras independientes en R
+
+Función aov(formula, data), donde:
+
+-   formula: se escribe de la forma variable dependiente \~ variable independiente.
+
+-   data: data frame que contiene las variables especificadas en la fórmula.
+
+Otra función: ezANOVA(data, dv, wid, between, return_aov), donde:
+
+-   data: data frame con los datos.
+
+-   dv: variable dependiente (numérica con escala de igual intervalo)
+
+-   wid: variable (factor) con el identificador de cada instancia
+
+-   between: variable independiente (factor)
+
+-   return_aov: si es verdadero, devuelve un objeto de tipo aov para uso posterior
+
+Esta función realiza también la prueba de homocedasticidad de Levene, sin asumir la normalidad de las poblaciones de origen.
+
+-   Ho: Las varianzas de las k poblaciones desde donde se obtuvieron las muestras son iguales
+
+-   Ha: Al menos una de las poblaciones de origen tiene una varianza diferente a alguna de las otras poblaciones
+
+Existe la función ezPlot(data, dv, wid, between, x) que permite visuallizar el tamaño del efecto. x señala la variable que normalmente corresponde al factor que identifica los grupos (la vía).
+
+help(ez)
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+library(ez)
+
+# Crear el data frame en formato ancho
+A <- c(23, 19, 25, 23, 20)
+B <- c(26, 24, 28, 23, 29)
+C <- c(19, 24, 20, 21, 17)
+datos <- data.frame(A, B, C)
+
+# Llevar data frame a formato largo
+datos <- datos %>% pivot_longer(c("A", "B", "C"),
+                                names_to = "algoritmo",
+                                values_to = "tiempo")
+
+datos[["algoritmo"]] <- factor(datos[["algoritmo"]])
+datos[["instancia"]] <- factor(1:nrow(datos))
+
+# Comprobación de normalidad
+g <- ggqqplot(datos, 
+              x = "tiempo",
+              y = "algoritmo",
+              color = "algoritmo")
+g <- g + facet_wrap(~ algoritmo)
+g <- g + rremove("x.ticks") + rremove("x.text")
+g <- g + rremove("y.ticks") + rremove("y.text")
+g <- g + rremove("axis.title")
+print(g)
+
+cat("Procedimiento ANOVA usando aov\n\n")
+prueba <- aov(tiempo ~ algoritmo, data = datos)
+print(summary(prueba))
+
+cat("Procedimiento ANOVA con eznova\n\n")
+
+prueba2 <- ezANOVA(
+  data = datos,
+  dv = tiempo,
+  between = algoritmo,
+  wid = instancia,
+  return_aov = TRUE
+)
+print(prueba2)
+
+```
+
+```{r}
+# Gráfico del tamaño del efecto
+g2 <- ezPlot(
+  data = datos,
+  dv = tiempo,
+  wid = instancia,
+  between = algoritmo,
+  y_lab = "Tiempo promedio de ejecución [ms]",
+  x = algoritmo
+)
+print(g2)
+```
+
+## Análisis post-hoc
+
+Método que permite determinar si 2 tiempos difieren significativemente (A con B, B con C o A con C). Teniendo k grupos, la cantidad de comparaciones (N) está dada por:
+
+$$
+N = \frac{k(k-1)}{2}
+$$
+
+### Correcciones de Bonferroni y Holm
+
+Los factores de corrección de Bonferroni y Holm distribuyen el nivel de significación cuando se realizan múltiples comparaciones entre pares de grupos. Ahora se realizan pruebas t para muestras independientes para cada par.
+
+Se tiene la función pairwise.t.test(x, g, p.adjust.method, pool.sd, paired, alternative, ...), donde:
+
+-   x: vector con la variable independiente
+
+-   g: factor o vector de agrupamiento
+
+-   p.adjust.method: señala qué método emplear para ajustar los valores p resultantes
+
+-   pool.sd: valor booleano que indica si se usa o no varianza combinada
+
+-   paired: valor booleano que indica si las pruebas t son pareadas o no
+
+-   alternative: indica si la prueba es bilateral ("two.sided") o unilateral ("greater" o "less").
+
+-   ...: argumentos adicionales que se pasan a la función t.test() que es llamada internamente
+
+```{r}
+library(tidyverse)
+
+# Crear el data frame en formato ancho
+
+A <- c(23, 19, 25, 23, 20)
+B <- c(26, 24, 28, 23, 29)
+C <- c(19, 24, 20, 21, 17)
+datos <- data.frame(A, B, C)
+
+# Llevar data frame a formato largo
+datos <- datos %>% pivot_longer(c("A", "B", "C"),
+                                names_to = "algoritmo",
+                                values_to = "tiempo")
+
+datos[["algoritmo"]] <- factor(datos[["algoritmo"]])
+datos[["instancia"]] <- factor(1:nrow(datos))
+
+# Establecer nivel de significancia (el mismo usado en ANOVA)
+alfa <- 0.025
+
+# Procedimiento post-hoc de Bonferroni
+cat("Procedimiento post-hoc de Bonferroni\n\n")
+
+bonferroni <- pairwise.t.test(datos[["tiempo"]],
+                              datos[["algoritmo"]],
+                              p.adj = "bonferroni",
+                              pool.sd = TRUE,
+                              paired = FALSE,
+                              conf.level = 1 - alfa)
+print(bonferroni)
+
+# Procedimiento post-hoc de Holm
+holm <- pairwise.t.test(datos[["tiempo"]],
+                        datos[["algoritmo"]],
+                        p.adj = "holm",
+                        pool.sd = TRUE,
+                        paired = FALSE,
+                        conf.level = 1 - alfa)
+print(holm)
+
+# En ambos casos se puede ver que únicamente los algoritmos B y C presentan una diferencia significativa al comparar el valor p ajustado. Se puede concluir entonces con un 97,5% de confianza que el algoritmo C es más rápido que el algoritmo B.
+```
+
+### Prueba HSD de Tukey
+
+Busca diferencias significativas entre los diferentes pares de medias, aunque ocupa el estadístico Q. Se tiene para cualquier par de medias en los k grupos:
+
+$$
+Q = \frac{\bar{x}_g - \bar{x}_p}{\sqrt{\frac{MS_{wg}}{n_m}}}
+$$
+
+$$
+n_m = \frac{k}{\sum_{i=1}^{k}\frac{1}{n_i}}
+$$
+
+-   $\bar{x}_g$ es la mayor de las dos medias comparadas
+
+-   $\bar{x}_p$ es la menor de las dos medias comparadas
+
+-   $MS_{wg}$ corresponde la media cuadrada intra-grupos (entregada por ANOVA)
+
+-   $n_m$ es la cantidad de observaciones por muestra. Si las k muestras tienen tamaños diferentes, se calcula mediante la fórmula $n_m$.
+
+La función qtukey($\alpha$, $n_m$, $\nu_{wg}$, lower.tail = FALSE) entrega el valor crítico de $Q_{\alpha}$. Esta permite determinar cuán grande debe ser la diferencia entre las medias de dos grupos para ser considerada significativa:
+
+$$
+HSD_{\alpha} = Q_{\alpha} . \sqrt{\frac{MS_{wg}}{n_m}}
+$$
+
+Una diferencia entre las medias de dos grupos únicamente es significativa si es mayor o igual que $HSD_{\alpha}$.
+
+También se puede emplear la prueba HSD de Tukey TukeyHSD(x, which, ordered, conf.level)
+
+-   x: un modelo ANOVA (objeto de tipo aov)
+
+-   which: string con el nombre de la variable para la que se calculan las diferencias
+
+-   ordered: valor lógico que, cuando es TRUE, hace que los grupos se ordenen de acuerdo a sus medias a fin de obtener medias positivas
+
+```{r}
+library(tidyverse)
+
+# Crear el data frame en formato ancho
+
+A <- c(23, 19, 25, 23, 20)
+B <- c(26, 24, 28, 23, 29)
+C <- c(19, 24, 20, 21, 17)
+datos <- data.frame(A, B, C)
+
+# Llevar data frame a formato largo
+datos <- datos %>% pivot_longer(c("A", "B", "C"),
+                                names_to = "algoritmo",
+                                values_to = "tiempo")
+
+datos[["algoritmo"]] <- factor(datos[["algoritmo"]])
+datos[["instancia"]] <- factor(1:nrow(datos))
+
+# Establecer nivel de significancia (el mismo usado en ANOVA)
+alfa <- 0.025
+
+# Procedimiento ANOVA
+anova <- aov(tiempo ~ algoritmo, data = datos)
+
+# Prueba HSD de Tukey
+post_hoc <- TukeyHSD(anova,
+                     "algoritmo",
+                     ordered = TRUE,
+                     conf.level = 1 - alfa)
+print(post_hoc)
+
+# Columna diff: diferencias de las medias entre grupos
+# Columna p.adj: valores p asociados a cada diferencia, ajustados para compararlos con el nivel de significación original
+# Columnas lwr y upr: muestran el límite inferior y superior del intervalo de (1 - a)*100 confianza para la verdadera diferencia entre las medias de los grupos
+```
+
+### Prueba de comparación de Scheffé
+
+Este método es conservador al momento de efectuar comparaciones entre pares. Su ventaja es que permite hacer comparaciones adicionales, además de todos los pares de grupos. Por ejemplo, comparar si un grupo es mejor que los demás.
+
+Los contrastes son combinaciones lineales de las medias de cada grupo.
+
+-   Ho: $\mu_A - \mu_B = 0$
+
+-   Ha: $\mu_A - \mu_B \neq 0$
+
+La hipótesis nula puede expresarse como:
+
+$$
+c_A.\mu_A + c_B.\mu_B + c_C.\mu_C = 0
+$$
+
+Y la combinación lineal es:
+
+$$
+1 * \mu_A - 1 * \mu_B + 0*\mu_C = 0
+$$
+
+$$
+[1, -1, 0]
+$$
+
+La segunda pregunta tiene como hipótesis:
+
+-   Ho: $\mu_A - \frac{\mu_B + \mu_C}{2} = 0$
+
+-   Ha: $\mu_A - \frac{\mu_B + \mu_C}{2} \neq 0$
+
+$$
+[1, -\frac{1}{2}, -\frac{1}{2}]
+$$
+
+1.  Determinar los contrastes a realizar. Cada fila de la matriz corresponde a un contraste.
+2.  Luego, calcular los estimadores para cada contraste $C_i$. Es decir, se multiplica por una matriz donde se incluya, en este caso, $\bar{x}_A$, $\bar{x}_B$ , $\bar{x}_C$ y luego se suman, aplicando valor absoluto y se obtienen los estimadores.
+
+Calcular los valores críticos para la prueba de comparación de Scheffé
+
+$$
+VC_i = \sqrt{\nu_{efecto}. F^* . MS_{error}.\sum_{j=1}^{k}\frac{c_j²}{n_j}}
+$$
+
+-   $i$: número de fila del contraste
+
+-   $\nu_{efecto}$, $\nu_{error}$ y $MS_{error}$: se obtienen desde la tabla ANOVA
+
+-   $F^*$: corresponde al percentil 1 - $\alpha$ de la distribución F
+
+-   $c_j$: peso del grupo j en la comparación i
+
+-   $n_j$: tamaño de la muestra para el grupo j
+
+4.  Se evalúa cada contraste, comparando el estimador $C_i$ con el valor crítico correspondiente $VC_i$. Si $C_i > VC_i$, la comparación es estadísticamente significativa. Podemos suponer con 97,5% de confianza que:
+    -   Existe una diferencia significativa entre las eficiencias de los algoritmos B y C
+
+    -   El tiempo promedio de ejecución del algoritmo B es distinto del tiempo promedio de ejecución (combinado) de los algoritmos A y C
+
+    -   El tiempo promedio de ejecución del algoritmo C es distinto del tiempo promedio de ejecución (combinado) de los algoritmos A y B
+
+Está la función ScheffeTest(x, which, contrasts, conf.level) del paquete DescTools, donde:
+
+-   x: objeto aov con el resultado de ANOVA
+
+-   which: variable independiente en la prueba
+
+-   contrasts: matriz de los contrastes (cada contraste es una columna)
+
+```{r}
+library(tidyverse)
+library(DescTools)
+
+# Crear el data frame en formato ancho
+
+A <- c(23, 19, 25, 23, 20)
+B <- c(26, 24, 28, 23, 29)
+C <- c(19, 24, 20, 21, 17)
+datos <- data.frame(A, B, C)
+
+# Llevar data frame a formato largo
+datos <- datos %>% pivot_longer(c("A", "B", "C"),
+                                names_to = "algoritmo",
+                                values_to = "tiempo")
+
+datos[["algoritmo"]] <- factor(datos[["algoritmo"]])
+datos[["instancia"]] <- factor(1:nrow(datos))
+
+# Establecer nivel de significancia (el mismo usado en ANOVA)
+alfa <- 0.025
+
+# Procedimiento ANOVA
+anova <- aov(tiempo ~ algoritmo, data = datos)
+
+# Crear matriz de contrastes
+contrastes <- matrix(c(1, -1, 0,
+                       1, 0, -1,
+                       0, 1, -1,
+                       1, -0.5, -0.5,
+                       -0.5, 1, -0.5,
+                       -0.5, -0.5, 1),
+                     nrow = 6,
+                     byrow = TRUE)
+# Trasponer matriz de contrastes para que cada contraste sea una columna
+contrastes <- t(contrastes)
+
+# Hacer prueba de Scheffé
+scheffe <- ScheffeTest(x = anova, 
+                       which = "algoritmo",
+                       contrasts = contrastes,
+                       conf.level = 1 - alfa)
+print(scheffe)
+
+# Si no se entregan los argumentos which y contrasts, se contrastan todos los pares.
+```

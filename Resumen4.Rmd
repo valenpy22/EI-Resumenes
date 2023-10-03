@@ -118,7 +118,7 @@ print(g)
 
 A continuación, se evidencia la ventaja de las pruebas unilaterales: cuando el tamaño del efecto aumenta en el sentido de la hipótesis alternativa, el poder es mayor que para una prueba bilateral.
 
-![Poder estadístico Prueba bilateral vs Prueba unilateral](images/Screenshot from 2023-09-23 08-26-37.png)
+![Poder estadístico Prueba bilateral vs Prueba unilateral](images/Screenshot%20from%202023-09-23%2008-26-37.png)
 
 ### Tamaño del efecto
 
@@ -412,7 +412,7 @@ d <- (4 / desv_est) * ((n-2)/(n-1.25))
 
 cat("\n\nCálculo del poder con pwr.t.test()\n")
 
-resultado <- pwr.test(n = n,
+resultado <- pwr.t.test(n = n,
                       d = d,
                       sig.level = alfa,
                       power = NULL,
