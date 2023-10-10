@@ -1,0 +1,210 @@
+---
+title: "Resumen7"
+author: "Valentina Paz Campos Olguín"
+date: "2023-10-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ANOVA de una vía para muestras correlacionadas
+
+Ho: El tiempo de ejecución promedio es igual para los cuatro algoritmos.
+
+Ha: El tiempo de ejecución promedio es diferente para al menos un algoritmo.
+
+### Condiciones
+
+1.  La escala con que se mide la variable dependiente tiene las propiedades de una escala de intervalos iguales.
+2.  Las mediciones son independientes al interior de cada grupo.
+3.  Se puede suponer que las poblaciones siguen una distribución normal.
+4.  La matriz de varianzas-covarianzas es esférica. Las varianzas entre los diferentes niveles de las medidas repetidas deben ser iguales.
+
+#### 1. Separando la variabilidad intra-grupos.
+
+$$
+SS_{wg} = SS_{sujetos} + SS_{error}
+$$
+
+-   k: cantidad de observaciones por cada sujeto
+
+-   $\bar{x}_i$: media de las observaciones del i-ésimo sujeti
+
+-   $\bar{x}_T$: media combinada de mediciones
+
+$$
+SS_{sujetos} = k\sum_{i=1}^{n}(\bar{x}_i - \bar{x}_T)²
+$$
+
+$$
+\nu_T = n_T - 1
+$$
+
+$$
+\nu_{bg} = k - 1
+$$
+
+$$
+\nu_{wg} = n_T - k
+$$
+
+$$
+\nu_{sujetos} = n_{sujetos} - 1
+$$
+
+$$
+\nu_{error} = \nu_{wg} - \nu_{sujetos}
+$$
+
+$$
+MS_{error} = \frac{SS_{error}}{\nu_{error}}
+$$
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+library(ez)
+
+# Create the data frame.
+instancia <- factor(1:6)
+Quicksort <- c(23.2, 22.6, 23.4, 23.3, 21.8, 23.9)
+Bubblesort <- c(31.6, 29.3, 30.7, 30.8, 29.8, 30.3)
+Radixsort <- c(30.1, 28.4, 28.7, 28.3, 29.9, 29.1)
+Mergesort <- c(25.0, 25.7, 25.7, 23.7, 25.5, 24.7)
+datos <- data.frame(instancia, Quicksort, Bubblesort, Radixsort, Mergesort)
+
+# Convert data frame to long format.
+datos <- datos %>% pivot_longer(c("Quicksort", "Bubblesort", "Radixsort", "Mergesort"),
+                                names_to = "algoritmo", values_to = "tiempo")
+
+datos[["algoritmo"]] <- factor(datos[["algoritmo"]])
+
+# Normality check.
+g <- ggplot(datos, aes(x = "tiempo", y = "algoritmo", color = "algoritmo")) +
+  geom_boxplot() +
+  facet_wrap(~ algoritmo) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        axis.ticks.x = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank())
+print(g)
+
+# ANOVA using aov procedure.
+cat("Using ANOVA with aov\n\n")
+prueba <- aov(tiempo ~ algoritmo + Error(instancia/algoritmo), data = datos)
+print(summary(prueba))
+
+# ANOVA using ezANOVA procedure.
+cat("\nUsing ANOVA with ezANOVA\n\n")
+prueba2 <- ezANOVA(data = datos, dv = tiempo, within = algoritmo, wid = instancia, return_aov = TRUE)
+print(summary(prueba2$`ANOVA`))
+cat("\nFor more information:\n")
+cat("Result of Mauchly's test of sphericity:\n")
+print(prueba2$`Mauchly's Test for Sphericity`)
+
+cat("\n\nCorrection factors when sphericity is not met:\n")
+cat("Sphericity condition:\n")
+print(prueba2$`Sphericity Corrections`)
+
+# Effect size graph.
+g2 <- ezPlot(data = datos, dv = tiempo, wid = instancia, within = algoritmo,
+             y.lab = "Average execution time [ms]", x = algoritmo)
+print(g2)
+```
+
+Se tiene que p = 0.55, por lo que se cumple la condición de esfericidad.
+
+-   GGe: estimación $\epsilon$ con el método Greenhose-Geisser.
+
+-   p[gg]: valor p tras la corrección de Greenhouse-Geisser.
+
+-   HFe: estimación de $\epsilon$ con el método de Huynd-Feldt.
+
+-   p[HF]: valor p tras la corrección de Huynd-Feldt.
+
+Si los datos no cumplen con la esfericidad, se toma el valor de p[GG] como valor de p.
+
+## Procedimientos Post-hoc
+
+En el caso de las correcciones de Bonferroni y Holm, lo único que cambia es el valor de paired a TRUE de la función pairwise.t.test().
+
+Se hace un modelo mixto con la función lme(formula, data, random) de paquete nlme:
+
+-   formula: \<variable dependiente\> \~ \<variable categórica\>
+
+-   data: matriz de datos en formato largo
+
+-   random: fórmula de la forma \~1\|\<identificador del sujeto\>
+
+Se estima la variable dependiente para cada nivel de la variable categórica. Se ocupa emmeans(object, specs):
+
+-   object: modelo mixtro del paso previo
+
+-   specs: nombre del factor de estudio, delimitado por comillas.
+
+Para estimar las medias de las difernecias para los contrastes enter pares, con su error estándar y valores p, se usa pairs(x, adjust):
+
+-   x: diferencias obtenidas en el párrafo precedente
+
+-   adjust: método para ajustar los valores p. "tukey" y "scheffe".
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(nlme)
+library(emmeans)
+library(ez)
+
+# Create the data frame
+instancia <- factor(1:6)
+Quicksort <- c(23.2, 22.6, 23.4, 23.3, 21.8, 23.9)
+Bubblesort <- c(31.6, 29.3, 30.7, 30.8, 29.8, 30.3)
+Radixsort <- c(30.1, 28.4, 28.7, 28.3, 29.9, 29.1)
+Mergesort <- c(25.0, 25.7, 25.7, 23.7, 25.5, 24.7)
+datos <- data.frame(instancia, Quicksort, Bubblesort, Radixsort, Mergesort)
+
+# Convert data frame to long format
+datos <- datos %>% pivot_longer(c("Quicksort", "Bubblesort", "Radixsort", "Mergesort"),
+                                names_to = "algoritmo", values_to = "tiempo")
+
+datos[["algoritmo"]] <- factor(datos[["algoritmo"]])
+
+# Set significance level
+alfa <- 0.01
+
+# Perform ANOVA
+anova_result <- ezANOVA(data = datos, dv = tiempo, within = algoritmo, wid = instancia, return_aov = TRUE)
+print(anova_result)
+
+# Post-hoc analysis using Bonferroni correction
+bonferroni <- pairwise.t.test(datos[["tiempo"]], datos[["algoritmo"]],
+                              p.adj = "bonferroni", paired = TRUE)
+
+cat("Bonferroni Correction\n")
+print(bonferroni)
+
+# Post-hoc analysis using Holm correction
+holm <- pairwise.t.test(datos[["tiempo"]], datos[["algoritmo"]],
+                        p.adj = "holm", paired = TRUE)
+
+# Print Holm results
+cat("\nHolm Correction\n")
+print(holm)
+
+# Post-hoc analysis using Tukey's HSD
+mixto <- lme(tiempo ~ algoritmo, data = datos, random = ~1|instancia)
+medias <- emmeans(mixto, "algoritmo")
+tukey <- pairs(medias, adjust = "tukey")
+
+cat("\nTukey's HSD Test\n")
+print(tukey)
+
+# Post-hoc analysis using Scheffé's method
+scheffe <- pairs(medias, adjust = "scheffe")
+
+cat("\nScheffé Comparison\n")
+print(scheffe)
+
+```
