@@ -100,6 +100,8 @@ print(summary(prueba))
 cat("\nUsing ANOVA with ezANOVA\n\n")
 prueba2 <- ezANOVA(data = datos, dv = tiempo, within = algoritmo, wid = instancia, return_aov = TRUE)
 print(summary(prueba2$`ANOVA`))
+
+
 cat("\nFor more information:\n")
 cat("Result of Mauchly's test of sphericity:\n")
 print(prueba2$`Mauchly's Test for Sphericity`)
@@ -109,9 +111,9 @@ cat("Sphericity condition:\n")
 print(prueba2$`Sphericity Corrections`)
 
 # Effect size graph.
-g2 <- ezPlot(data = datos, dv = tiempo, wid = instancia, within = algoritmo,
-             y.lab = "Average execution time [ms]", x = algoritmo)
-print(g2)
+#g2 <- ezPlot(data = datos, dv = tiempo, wid = instancia, within = algoritmo,
+#             y.lab = "Average execution time [ms]", x = algoritmo)
+#print(g2)
 ```
 
 Se tiene que p = 0.55, por lo que se cumple la condición de esfericidad.
