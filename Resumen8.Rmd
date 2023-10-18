@@ -350,3 +350,125 @@ $$
 $$
 
 #### Prueba de suma de rangos de Wilcoxon para muestras grandes
+
+Asumiendo que Ho es verdadera, se puede demostrar que las distribuciones muestrales tienen la misma desviación estándar
+
+$$
+\sigma_T = \sqrt{\frac{n_An_B(n_T+1)}{12}}
+$$
+
+Cuando ambas muestras tienen tamaño mayor o igual a 5 se puede demostrar que provienen de una distribución normal.
+
+$$
+z = \frac{T_{obs} - \mu_{obs} \pm 0.5}{\sigma_T}
+$$
+
+-   $T_{obs}$ es cualquiera de los valores observados.
+
+-   $\mu_{obs}$ es la media de la distribución muestral de $T_{obs}$
+
+-   $\sigma_T$ es la desviación estándar de la distribución muestral de $T_{obs}$
+
+Se debe emplear el siguiente factor de corrección de continuidad:
+
+-   -0.5 si $T_{obs}$ \> $\mu_{obs}$
+
+-   0.5 si $T_{obs}$ \< $\mu_{obs}$
+
+Si se tiene como Ha que la interfaz A es mejor que la B, entonces se espera que las observaciones de mayor rango estén en A, por lo que $z_A$ sería positivo.
+
+Solo permite calcular el valor p asociado a una hipótesis alternativa unilateral.
+
+#### Prueba de suma de rangos de Wilcoxon para muestras pequeñas
+
+No se puede usar el supuesto de normalidad.
+
+Se puede calcular el máximo valor posible para la suma de rangos de cada muestra.
+
+$$
+T_{x[max]} = n_xn_y+\frac{n_x(n_x+1)}{2}
+$$
+
+$$
+U_x = T_{x[max]} - T_x
+$$
+
+Siendo el valor estadístico el menor de ambos.
+
+$$
+U_A + U_B = n_An_B
+$$
+
+Si la hipótesis nula es verdadera:
+
+$$
+U_A = U_B = \frac{n_An_B}{2}
+$$
+
+Si la Ho es verdadera, ¿qué tan probable es obtener un valor de U al menos tan pequeño como el observado?
+
+#### Prueba de suma de rangos de Wilcoxon en R
+
+wilcox.test(x, y, paired = FALSE, alternative, mu, conf.level)
+
+```{r}
+#Ingresar los datos
+a <- c(2.7, 6.6, 1.6, 5.1, 3.7, 6.1, 5.0, 1.4, 1.8, 1.5, 3.0, 5.3)
+b <- c(5.0, 1.4, 5.6, 4.6, 6.7, 2.7, 1.3, 6.3, 3.7, 1.3, 6.8)
+
+#Establecer nivel de significación
+alfa <- 0.05
+
+#Hacer prueba
+prueba <- wilcox.test(a, b, alternative = "two.sided", conf.level = 1-alfa)
+print(prueba)
+```
+
+Se prueba la distribución nula que la distribución de origen es dimétrica en torno al valor mu. Mu es el valor nulo para la mediana de la distribución de origen.
+
+#### Prueba de rangos con signo de Wilcoxon
+
+Condiciones
+
+1.  Los pares de observaciones son independientes.
+2.  La escala de medición empleada para las observaciones es intrínsicamente continua.
+3.  La escala de medición empleada para ambas muestras debe ser a lo menos ordinal.
+
+Ho: Las mismas personas no perciben diferencia en la usabilidad de ambas interfaces.
+
+Ha: Las mismas personas consideran que la interfaz A tiene mejor usabilidad que la interfaz B.
+
+Se calculan las diferencias entre cada par de observaciones y se descartan aquellas que sean 0. Se ordenan de menor a mayor y se les asigna rango con su signo.
+
+Se procede a calcular W, siendo la suma de los rangos con signo.
+
+Una muestra de tamaño n genera n rangos no empatados sin signo. Cada rango puede tomar valores positivos o negativos, por lo que para W se tienen $2^n$ combinaciones para signos y rangos.
+
+Si Ho fuese cierta, los rangos positivos y negativos se distribuirían de manera homogénea, por lo que se espera que W sea cercano a 0.
+
+Mientras mayor sea el n, más se acerca a una distribución normal.
+
+$$
+\sigma_W = \sqrt{\frac{n(n+1)(2n+1)}{6}}
+$$
+
+$$
+z = \frac{W - 0.5}{\sigma_W}
+$$
+
+El supuesto de normalidad es válido solo para n \> 10.
+
+wilcox.test(x, y, paired = TRUE, alternative, conf.level)
+
+```{r}
+#Ingresar los datos
+a <- c(2.7, 6.6, 1.6, 5.1, 3.7, 6.1, 5.0, 1.4, 1.8, 1.5, 3.0, 5.3)
+b <- c(5.0, 1.4, 5.6, 4.6, 6.7, 2.7, 1.3, 6.3, 3.7, 1.3, 6.8)
+
+#Establecer nivel de significación
+alfa <- 0.05
+
+#Hacer prueba
+prueba <- wilcox.test(a, b, alternative = "greater", paired = TRUE, conf.level = 1-alfa)
+print(prueba)
+```
