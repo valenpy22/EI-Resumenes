@@ -169,7 +169,11 @@ Suma de las probabilidades de todas las tablas con probabilidad menor o igual qu
 
 ```{r}
 #Construir la tabla de contingencia
+#Primer parámetro: Cantidad total de Argh
+#Segundo parámetro: Cantidad total de Grrr
 vacuna <- c(rep("Argh", 6), rep("Grrr", 11))
+#Primer parámetro: Cantidad total de humanos
+#Segundo parámetro: Cantidad total de vampiros
 resultado <- c(rep("Humano", 12), rep("Vampiro", 5))
 datos <- data.frame(resultado, vacuna)
 tabla <- xtabs(~., datos)
@@ -222,8 +226,22 @@ El valor p está dado por el área bajo la cola superior de la distribución chi
 ```{r}
 #Construir la tabla de contingencia
 alumno <- seq(1:25)
+# Modelo 1: Antes de prueba
+# Primer parámetro: Cantidad total de correctos
+# Segundo parámetro: Cantidad total de incorrectos
 modelo_1 <- c(rep("Correcto", 16), rep("Incorrecto", 9))
+
+# Modelo 2: Después de prueba
+# Primer parámetro: Cantidad de correctos-correctos
+# Segundo parámetro: Cantidad total de incorrectos
+# Tercer parámetro: Cantidad de incorrectos-correctos
 modelo_2 <- c(rep("Correcto", 9), rep("Incorrecto", 11), rep("Correcto", 5))
+
+#             Correcto  Incorrecto  Total
+# Correcto       9          5
+# Incorrecto                         11
+# Total          16         9
+
 datos <- data.frame(alumno, modelo_2, modelo_1)
 tabla <- table(modelo_2, modelo_1)
 print(tabla)
@@ -308,6 +326,11 @@ library(tidyverse)
 library(RVAideMemoire)
 
 #Crear matriz de datos
+# Instancia  Annealing  Col. hormigas  Alg. genético
+# 1             0             0             1
+# 2             1             0             0
+# 3             0             1             1
+
 instancia <- 1:15
 annealing <- c(0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0)
 hormigas <- c(0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1)
